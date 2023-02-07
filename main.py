@@ -222,6 +222,9 @@ if __name__ == "__main__":
     
     main()
     
+    for i in range(len(var_list)):
+         var_list[i] = var_list[i].cpu().data
+    
     fig = plt.figure(figsize=(16,8))
     plt.plot(var_list)
     plt.title('linear layer')
