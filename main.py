@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss, L1Loss
 from torch.optim import SGD, Adam
+import matplotlib.pyplot as plt
 
 
 parser = argparse.ArgumentParser(description='Improving stealthy BFA robustness via output code matching')
@@ -20,7 +21,7 @@ parser.add_argument('--ocm', action='store_true', help='output layer coding with
 parser.add_argument('--output_act', type=str, default='linear', help='output act. (only linear and tanh is supported)')
 parser.add_argument('--code_length', '-cl', default=16, type=int, help='length of codewords')
 parser.add_argument('--outdir', type=str, default='results/', help='folder to save model and training log')
-parser.add_argument('--epochs', '-e', default=160, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('--epochs', '-e', default=150, type=int, metavar='N', help='number of total epochs to run')
 parser.add_argument('--batch', '-b', default=128, type=int, metavar='N', help='Mini-batch size (default: 128)')
 parser.add_argument('--opt', type=str, default='sgd', help='sgd or adam optimizer')
 parser.add_argument('--lr', default=0.1, type=float, help='initial learning rate')
@@ -89,7 +90,16 @@ def train(loader, model, criterion, optimizer, epoch, C):
         top1.update(acc1.item(), inputs.size(0))
         top5.update(acc5.item(), inputs.size(0))
 
-        loss.backward()
+        loss.backward(retain_graph=True)
+        
+        #add noise
+        ori_grad =model.module.linear.weight.grad.clone()
+        var_list.append(torch.var(ori_grad, unbiased=False))
+        ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
+        rand_grad = torch.rand_like(ori_grad).cuda()
+        loss_grad = criterion_grad(ori_grad,rand_grad)
+        loss_grad.backward()
+        
         optimizer.step()
 
         batch_time.update(time.time() - end)
@@ -207,4 +217,12 @@ def main():
 
 
 if __name__ == "__main__":
+    var_list=[]
+    criterion_grad = nn.MSELoss()
+    
     main()
+    
+    fig = plt.figure(figsize=(16,8))
+    plt.plot(var_list)
+    plt.title('linear layer')
+    plt.show()
