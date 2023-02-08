@@ -102,8 +102,17 @@ def train(loader, model, criterion, optimizer, epoch, C):
         loss_grad.backward()
         '''
         
+        '''
         #add noise version2
         model.module.linear.weight.grad = model.module.linear.weight.grad + torch.randn_like(model.module.linear.weight.grad)
+        '''
+        
+        '''
+        linear_grad_max =  model.module.linear.weight.grad.abs().max()
+        '''
+        
+        model.module.linear.weight.grad = torch.inverse(model.module.linear.weight.grad)
+        
         
         optimizer.step()
 
