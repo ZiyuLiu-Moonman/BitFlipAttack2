@@ -108,7 +108,7 @@ def train(loader, model, criterion, optimizer, epoch, C):
         '''
         
         '''
-        linear_grad_max =  model.module.linear.weight.grad.abs().max()
+        linear_grad_max =  model.module.linear.weight.grad.abs().max().item()
         '''
         
         model.module.linear.weight.grad = torch.reciprocal(model.module.linear.weight.grad)
