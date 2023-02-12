@@ -93,20 +93,21 @@ def train(loader, model, criterion, optimizer, epoch, C):
 
         loss.backward(retain_graph=True)
         
-        '''
+        
         #add noise
         ori_grad =model.module.linear.weight.grad.clone()
         var_list.append(torch.var(ori_grad, unbiased=False))
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
-        rand_grad = torch.rand_like(ori_grad).cuda()
+        rand_grad = 10*torch.rand_like(ori_grad).cuda()
         loss_grad = criterion_grad(ori_grad,rand_grad)
         loss_grad.backward()
-        '''
         
+        '''
         ori_grad = model.module.linear.weight.grad.clone()
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)
         loss_grad = criterion_grad(ori_grad,rand_grad_fix.detach())
         loss_grad.backward()
+        '''
         
         '''
         #add noise version2
@@ -215,13 +216,7 @@ def main():
                 init_logfile(log_filename, "epoch\ttime\tlr\ttrain loss\ttrain acc\ttestloss\ttest acc")
                 start_epoch, best_acc1 = 0, 0
 
-                
-                    
-        #add fixed noise
-        ori_grad_fix = model.module.linear.weight.grad.clone()        
-        ori_grad_fix = torch.autograd.Variable(ori_grad_fix, requires_grad=True)          
-        rand_grad_fix = torch.rand_like(ori_grad_fix).cuda()
-        
+                      
         for epoch in range(start_epoch, args.epochs):
             lr = lr_scheduler(optimizer, epoch, args)
 
