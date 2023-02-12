@@ -66,11 +66,6 @@ def train(loader, model, criterion, optimizer, epoch, C):
 
     model.train()
     
-    #add fixed noise
-    ori_grad_fix = model.module.linear.weight.grad.clone()        
-    ori_grad_fix = torch.autograd.Variable(ori_grad_fix, requires_grad=True)          
-    rand_grad_fix = torch.rand_like(ori_grad_fix).cuda()
-    
     end = time.time()
     for i, data in enumerate(loader):
         data_time.update(time.time() - end)
@@ -220,6 +215,13 @@ def main():
                 init_logfile(log_filename, "epoch\ttime\tlr\ttrain loss\ttrain acc\ttestloss\ttest acc")
                 start_epoch, best_acc1 = 0, 0
 
+                
+                    
+        #add fixed noise
+        ori_grad_fix = model.module.linear.weight.grad.clone()        
+        ori_grad_fix = torch.autograd.Variable(ori_grad_fix, requires_grad=True)          
+        rand_grad_fix = torch.rand_like(ori_grad_fix).cuda()
+        
         for epoch in range(start_epoch, args.epochs):
             lr = lr_scheduler(optimizer, epoch, args)
 
