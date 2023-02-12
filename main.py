@@ -65,6 +65,12 @@ def train(loader, model, criterion, optimizer, epoch, C):
     progress = ProgressMeter(len(loader), [batch_time, data_time, losses, top1, top5], prefix="Epoch: [{}]".format(epoch))
 
     model.train()
+    
+    #add fixed noise
+    ori_grad_fix = model.module.linear.weight.grad.clone()        
+    ori_grad_fix = torch.autograd.Variable(ori_grad_fix, requires_grad=True)          
+    rand_grad_fix = torch.rand_like(ori_grad_fix).cuda()
+    
     end = time.time()
     for i, data in enumerate(loader):
         data_time.update(time.time() - end)
@@ -102,6 +108,11 @@ def train(loader, model, criterion, optimizer, epoch, C):
         loss_grad.backward()
         '''
         
+        ori_grad = model.module.linear.weight.grad.clone()
+        ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)
+        loss_grad = criterion_grad(ori_grad,rand_grad_fix.detach())
+        loss_grad.backward()
+        
         '''
         #add noise version2
         model.module.linear.weight.grad = model.module.linear.weight.grad + torch.randn_like(model.module.linear.weight.grad)
@@ -111,8 +122,9 @@ def train(loader, model, criterion, optimizer, epoch, C):
         linear_grad_max =  model.module.linear.weight.grad.abs().max().item()
         '''
         
+        '''
         model.module.linear.weight.grad = torch.reciprocal(model.module.linear.weight.grad)
-        
+        '''
         
         optimizer.step()
 
