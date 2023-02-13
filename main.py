@@ -123,7 +123,7 @@ def train(loader, model, criterion, optimizer, epoch, C):
         #Use reciprocal
         ori_grad =model.module.linear.weight.grad.clone()
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
-        reciprocal_grad = torch.reciprocal(model.module.linear.weight.grad).cuda()
+        reciprocal_grad = 10*torch.reciprocal(ori_grad).cuda()
         loss_grad = criterion_grad(ori_grad,reciprocal_grad)
         loss_grad.backward()
         
