@@ -93,7 +93,7 @@ def train(loader, model, criterion, optimizer, epoch, C):
 
         loss.backward(retain_graph=True)
         
-        
+        '''
         #add noise
         ori_grad =model.module.linear.weight.grad.clone()
         var_list.append(torch.var(ori_grad, unbiased=False))
@@ -101,6 +101,7 @@ def train(loader, model, criterion, optimizer, epoch, C):
         rand_grad = 10*torch.rand_like(ori_grad).cuda()
         loss_grad = criterion_grad(ori_grad,rand_grad)
         loss_grad.backward()
+        '''
         
         '''
         ori_grad = model.module.linear.weight.grad.clone()
@@ -118,9 +119,14 @@ def train(loader, model, criterion, optimizer, epoch, C):
         linear_grad_max =  model.module.linear.weight.grad.abs().max().item()
         '''
         
-        '''
-        model.module.linear.weight.grad = torch.reciprocal(model.module.linear.weight.grad)
-        '''
+        
+        #Use reciprocal
+        ori_grad =model.module.linear.weight.grad.clone()
+        ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
+        reciprocal_grad = torch.reciprocal(model.module.linear.weight.grad).cuda()
+        loss_grad = criterion_grad(ori_grad,reciprocal_grad)
+        loss_grad.backward()
+        
         
         optimizer.step()
 
