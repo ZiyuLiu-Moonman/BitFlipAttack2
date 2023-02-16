@@ -248,6 +248,7 @@ def main():
                 epoch, str(datetime.timedelta(seconds=(after - before))), lr, train_loss, train_acc, test_loss, test_acc))
         
         grad_list = model.module.linear.weight.grad.clone()
+        print("Shape:", grad_list.shape)
         print("Mean:", torch.mean(grad_list))
         print("Standard deviation:", torch.std(grad_list))
         
