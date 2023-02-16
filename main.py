@@ -124,14 +124,14 @@ def train(loader, model, criterion, optimizer, epoch, C):
         linear_grad_max =  model.module.linear.weight.grad.abs().max().item()
         '''
         
-        
+        '''
         #Use reciprocal
         ori_grad =model.module.linear.weight.grad.clone()
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
         reciprocal_grad = 100*torch.reciprocal(ori_grad).cuda()
         loss_grad = criterion_grad(ori_grad,reciprocal_grad)
         loss_grad.backward()
-        
+        '''
         
         optimizer.step()
 
@@ -244,6 +244,13 @@ def main():
 
             log(log_filename, "{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}".format(
                 epoch, str(datetime.timedelta(seconds=(after - before))), lr, train_loss, train_acc, test_loss, test_acc))
+        
+        grad_list = model.module.linear.weight.grad.clone()
+        print("Mean:", torch.mean(grad_list))
+        print("Standard deviation:", torch.std(grad_list))
+        
+            
+            
     else:
         eval_best = torch.load(args.outdir + 'model_best.pth.tar', map_location=device)
         model.load_state_dict(eval_best['state_dict'])
