@@ -141,6 +141,10 @@ def train(loader, model, criterion, optimizer, epoch, C):
 
         if i % args.print_freq == 0:
             progress.display(i)
+        
+        grad_list = model.module.linear.weight.grad.clone()
+        print("Mean:", torch.mean(grad_list))
+        print("Standard deviation:", torch.std(grad_list))
 
     return losses.avg, top1.avg
 
