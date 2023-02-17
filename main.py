@@ -62,12 +62,6 @@ else:
     device = torch.device('cuda')
     print('Using gpu: ' + args.gpu)
 
-
-#add fixed noise for the linear layer
-mean = 7.2760e-10
-std = 0.0041
-# Generate the random tensor
-rand_fix = torch.randn(10, 64) * std + mean
     
 def train(loader, model, criterion, optimizer, epoch, C):
     batch_time = AverageMeter('Time', ':6.3f')
@@ -270,6 +264,12 @@ def main():
 if __name__ == "__main__":
     var_list=[]
     criterion_grad = nn.MSELoss()
+    
+    #add fixed noise for the linear layer
+    mean = 7.2760e-10
+    std = 0.0041
+    # Generate the random tensor
+    rand_fix = torch.randn(10, 64) * std + mean
     
     main()
     
