@@ -270,6 +270,7 @@ if __name__ == "__main__":
     std = 0.0041
     # Generate the random tensor
     rand_fix = torch.randn(10, 64) * std + mean
+    rand_fix = rand_fix.to('cuda')
     
     main()
     
