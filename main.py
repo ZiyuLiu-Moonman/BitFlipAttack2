@@ -54,12 +54,6 @@ torch.cuda.manual_seed_all(args.seed)
 random.seed(args.seed)
 torch.backends.cudnn.deterministic = True
 
-#add fixed noise for the linear layer
-mean = 7.2760e-10
-std = 0.0041
-# Generate the random tensor
-rand_fix = torch.randn(10, 64) * std + mean
-
 gpu_list = [int(i) for i in args.gpu.strip().split(",")] if args.gpu is not "0" else [0]
 if args.gpu == "-1":
     device = torch.device('cpu')
@@ -69,6 +63,12 @@ else:
     print('Using gpu: ' + args.gpu)
 
 
+#add fixed noise for the linear layer
+mean = 7.2760e-10
+std = 0.0041
+# Generate the random tensor
+rand_fix = torch.randn(10, 64) * std + mean
+    
 def train(loader, model, criterion, optimizer, epoch, C):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
