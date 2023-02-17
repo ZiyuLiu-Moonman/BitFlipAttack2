@@ -38,7 +38,7 @@ parser.add_argument('--resume', action="store_true", help='resume training from 
 parser.add_argument('--finetune', action="store_true", help='for finetuning pre-trained imagenet models')
 parser.add_argument('--ft_path', type=str, default='results/imagenet/resnet50_quan8/', help='finetune model path')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
-parser.add_argument('--coefficiency', '-co', default=1, type=int, help='coefficiency value')
+parser.add_argument('--coefficiency', '-coe', default=1, type=int, help='coefficiency value')
 args = parser.parse_args()
 
 if not os.path.exists(args.outdir):
