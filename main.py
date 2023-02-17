@@ -38,6 +38,7 @@ parser.add_argument('--resume', action="store_true", help='resume training from 
 parser.add_argument('--finetune', action="store_true", help='for finetuning pre-trained imagenet models')
 parser.add_argument('--ft_path', type=str, default='results/imagenet/resnet50_quan8/', help='finetune model path')
 parser.add_argument('--seed', type=int, default=1, metavar='S', help='random seed (default: 1)')
+parser.add_argument('--coefficiency', '-cov', default=1, type=int, help='coefficiency value')
 args = parser.parse_args()
 
 if not os.path.exists(args.outdir):
@@ -52,6 +53,12 @@ torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 random.seed(args.seed)
 torch.backends.cudnn.deterministic = True
+
+#add fixed noise for the linear layer
+mean = 7.2760e-10
+std = 0.0041
+# Generate the random tensor
+rand_fix = torch.randn(10, 64) * std + mean
 
 gpu_list = [int(i) for i in args.gpu.strip().split(",")] if args.gpu is not "0" else [0]
 if args.gpu == "-1":
@@ -99,15 +106,15 @@ def train(loader, model, criterion, optimizer, epoch, C):
 
         loss.backward(retain_graph=True)
         
-        '''
+        
         #add noise
         ori_grad =model.module.linear.weight.grad.clone()
-        var_list.append(torch.var(ori_grad, unbiased=False))
+        #var_list.append(torch.var(ori_grad, unbiased=False))
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
-        rand_grad = 10*torch.rand_like(ori_grad).cuda()
-        loss_grad = criterion_grad(ori_grad,rand_grad)
+        #rand_grad = 10*torch.rand_like(ori_grad).cuda()
+        loss_grad = args.cov * criterion_grad(ori_grad,rand_fix)
         loss_grad.backward()
-        '''
+        
         
         '''
         ori_grad = model.module.linear.weight.grad.clone()
