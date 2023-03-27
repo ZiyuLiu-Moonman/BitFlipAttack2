@@ -53,6 +53,7 @@ torch.manual_seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 random.seed(args.seed)
 torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 gpu_list = [int(i) for i in args.gpu.strip().split(",")] if args.gpu is not "0" else [0]
 if args.gpu == "-1":
