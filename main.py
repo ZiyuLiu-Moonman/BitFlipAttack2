@@ -224,6 +224,8 @@ def main():
             before = time.time()
             train_loss, train_acc = train(train_loader, model, criterion, optimizer, epoch, C)
             test_loss, test_acc = test(test_loader, model, criterion, C)
+            print('weight_conv',model.module.conv1.weight)
+            print('weight_linear',model.module.linear.weight)
             after = time.time()
 
             is_best = test_acc > best_acc1
@@ -235,8 +237,7 @@ def main():
             log(log_filename, "{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}".format(
                 epoch, str(datetime.timedelta(seconds=(after - before))), lr, train_loss, train_acc, test_loss, test_acc))
         
-        print('weight_conv',model.module.conv1.weight)
-        print('weight_linear',model.module.linear.weight)
+
         '''
         grad_list = model.module.linear.weight.grad.clone()
         print("Shape:", grad_list.shape)
