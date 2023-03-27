@@ -64,6 +64,10 @@ else:
 
     
 def train(loader, model, criterion, optimizer, epoch, C):
+    #add sparsity
+    l1_reg = nn.L1Loss()
+    l1_lambda = 0.1
+    
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -93,22 +97,29 @@ def train(loader, model, criterion, optimizer, epoch, C):
             acc1, acc5 = accuracy(probs, labels.to(device), topk=(1, 5))
         else:
             acc1, acc5 = accuracy(nn.Softmax()(outputs), targets, topk=(1, 5))
+        
+        #add L1 regularization to the loss function
+        l1_loss = 0
+              for param in model.parameters():
+              l1_loss += l1_lambda * l1_reg(param)
+        
+        loss += l1_loss
 
         losses.update(loss.item(), inputs.size(0))
         top1.update(acc1.item(), inputs.size(0))
         top5.update(acc5.item(), inputs.size(0))
 
-        loss.backward(retain_graph=True)
+        loss.backward()
         
         
-        
+        '''
         #Use reciprocal
         ori_grad =model.module.linear.weight.grad.clone()
         ori_grad = torch.autograd.Variable(ori_grad, requires_grad=True)         
         reciprocal_grad = torch.reciprocal(ori_grad).cuda()
         loss_grad = args.coefficiency * criterion_grad(ori_grad,reciprocal_grad)
         loss_grad.backward()
-        
+        '''
         
         optimizer.step()
 
@@ -223,11 +234,14 @@ def main():
             log(log_filename, "{}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}\t{:.3}".format(
                 epoch, str(datetime.timedelta(seconds=(after - before))), lr, train_loss, train_acc, test_loss, test_acc))
         
+        print('weight_conv',model.module.conv1.weight)
+        print('weight_linear',model.module.linear.weight)
+        '''
         grad_list = model.module.linear.weight.grad.clone()
         print("Shape:", grad_list.shape)
         print("Mean:", torch.mean(grad_list))
         print("Standard deviation:", torch.std(grad_list))
-        
+        '''
             
             
     else:
